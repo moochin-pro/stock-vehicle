@@ -18,6 +18,7 @@
         @media print { 
             .no-print { display: none !important; } 
             main { margin-left: 0 !important; padding: 0 !important; }
+            .print-area { border: none !important; box-shadow: none !important; }
         }
     </style>
 </head>
@@ -26,8 +27,8 @@
     <div id="loginOverlay" class="fixed inset-0 bg-[#0f172a] flex items-center justify-center z-[100]">
         <div class="bg-white p-10 rounded-[2.5rem] shadow-2xl w-[400px] text-center border-t-8 border-emerald-400">
             <h1 class="text-xl font-black mb-8 uppercase tracking-tighter">Cambolink21</h1>
-            <input id="username" type="text" placeholder="Username" class="w-full border p-4 rounded-xl mb-4 outline-none text-center font-bold">
-            <input id="password" type="password" placeholder="Password" class="w-full border p-4 rounded-xl mb-6 outline-none text-center font-bold">
+            <input id="username" type="text" placeholder="Username" class="w-full border p-4 rounded-xl mb-4 outline-none focus:ring-2 ring-emerald-400 text-center font-bold">
+            <input id="password" type="password" placeholder="Password" class="w-full border p-4 rounded-xl mb-6 outline-none text-center focus:ring-2 ring-emerald-400 font-bold">
             <button onclick="handleLogin()" class="w-full bg-slate-900 text-white p-4 rounded-xl font-black hover:bg-emerald-500 transition-all uppercase">Login</button>
         </div>
     </div>

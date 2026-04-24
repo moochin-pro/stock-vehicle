@@ -24,7 +24,7 @@ function adjustQty(v) {
     if(val >= 1) el.value = val;
 }
 
-// --- CORE LOGIC ---
+// --- CORE FUNCTIONS ---
 function addPart() {
     const n = document.getElementById('pName').value.trim();
     const pr = parseFloat(document.getElementById('pPrice').value);
@@ -54,6 +54,7 @@ function addVehicle() {
     if (p && m) {
         const isDuplicate = vehicles.some((v, idx) => v.plate === p && idx !== editIdx);
         if (isDuplicate) return alert("Plate Number already exists!");
+
         if (editType === 'vehicle') vehicles[editIdx] = { plate: p, model: m };
         else vehicles.push({ plate: p, model: m });
         resetEdit(); save();
@@ -93,7 +94,7 @@ function updateUI() {
     const repM = document.getElementById('reportMonthFilter').value;
     const repS = (document.getElementById('reportSearch') || {value:''}).value.toLowerCase();
 
-    // Inventory Rendering with Separate Date Column
+    // Inventory Rendering (Separate Columns for Excel Compatibility)
     let fParts = parts;
     if (invM !== 'all') fParts = parts.filter(p => p.updateMonth == invM);
     document.getElementById('partsList').innerHTML = fParts.map((p) => `
@@ -109,7 +110,7 @@ function updateUI() {
             </td>
         </tr>`).join('');
 
-    // Assets
+    // Asset Rendering
     document.getElementById('vTable').innerHTML = vehicles.map((v, idx) => `
         <tr class="border-b font-bold hover:bg-sky-50">
             <td class="p-6 text-sky-600 uppercase">${v.plate}</td>
@@ -120,7 +121,7 @@ function updateUI() {
             </td>
         </tr>`).join('');
 
-    // Report
+    // Report Rendering
     let total = 0;
     let fHist = history.map((h, idx) => {
         const v = vehicles.find(v => v.plate === h.plate);
