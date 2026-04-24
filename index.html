@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cambolink21 | Cloud Stock</title>
+    <title>Cambolink21 | Express Stock</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-
+    
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }
         .page-content { display: none; animation: fadeIn 0.3s ease-in-out; }
@@ -19,7 +19,11 @@
         .custom-scroll::-webkit-scrollbar { width: 5px; }
         .custom-scroll::-webkit-scrollbar-thumb { background: #d1fae5; border-radius: 10px; }
         .card-active { border: 2px solid #10b981 !important; background: #f0fdf4 !important; }
-        @media print { .no-print { display: none !important; } main { margin-left: 0 !important; padding: 0 !important; } }
+        @media print { 
+            .no-print { display: none !important; } 
+            main { margin-left: 0 !important; padding: 0 !important; }
+            .print-area { border: none !important; box-shadow: none !important; }
+        }
     </style>
 </head>
 <body class="text-slate-900">
@@ -27,25 +31,26 @@
     <div id="loginOverlay" class="fixed inset-0 bg-[#0f172a] flex items-center justify-center z-[100]">
         <div class="bg-white p-10 rounded-[2.5rem] shadow-2xl w-[400px] text-center border-t-8 border-emerald-400">
             <h1 class="text-xl font-black mb-8 uppercase tracking-tighter">Cambolink21</h1>
-            <input id="username" type="text" placeholder="Username" class="w-full border p-4 rounded-xl mb-4 outline-none text-center font-bold">
-            <input id="password" type="password" placeholder="Password" class="w-full border p-4 rounded-xl mb-6 outline-none text-center font-bold">
+            <input id="username" type="text" placeholder="Username" class="w-full border p-4 rounded-xl mb-4 outline-none focus:ring-2 ring-emerald-400 text-center font-bold">
+            <input id="password" type="password" placeholder="Password" class="w-full border p-4 rounded-xl mb-6 outline-none text-center focus:ring-2 ring-emerald-400 font-bold">
             <button onclick="handleLogin()" class="w-full bg-slate-900 text-white p-4 rounded-xl font-black hover:bg-emerald-500 transition-all uppercase">Login</button>
         </div>
     </div>
 
     <div id="app" class="hidden flex">
         <aside class="w-72 h-screen bg-[#0f172a] text-white fixed p-8 flex flex-col no-print shadow-2xl">
-            <div class="mb-12 flex items-center gap-3"><div class="w-8 h-8 bg-emerald-400 rounded-lg"></div><span class="text-sm font-black uppercase tracking-tighter">Cambolink21</span></div>
+            <div class="mb-12 flex items-center gap-3"><div class="w-8 h-8 bg-emerald-400 rounded-lg shadow-lg"></div><span class="text-sm font-black uppercase tracking-tighter">Cambolink21</span></div>
             <nav class="space-y-2 flex-1">
-                <button onclick="showPage('page-fix')" class="w-full text-left p-4 rounded-2xl font-bold transition-all" id="nav-fix">🔧 Service Entry</button>
+                <button onclick="showPage('page-fix')" class="w-full text-left p-4 rounded-2xl font-bold transition-all" id="nav-fix">📦 Service Entry</button>
                 <button onclick="showPage('page-parts')" class="w-full text-left p-4 rounded-2xl font-bold transition-all" id="nav-parts">📦 Inventory</button>
-                <button onclick="showPage('page-vehicles')" class="w-full text-left p-4 rounded-2xl font-bold transition-all" id="nav-vehicles">🚚 Asset List</button>
-                <button onclick="showPage('page-report')" class="w-full text-left p-4 rounded-2xl font-bold transition-all" id="nav-report">📜 Operations Report</button>
+                <button onclick="showPage('page-vehicles')" class="w-full text-left p-4 rounded-2xl font-bold transition-all" id="nav-vehicles">📦 Asset List</button>
+                <button onclick="showPage('page-report')" class="w-full text-left p-4 rounded-2xl font-bold transition-all" id="nav-report">📦 Ops Report</button>
             </nav>
             <button onclick="logout()" class="w-full p-4 text-red-400 font-bold text-left hover:bg-red-500/10 rounded-2xl transition">Logout</button>
         </aside>
 
         <main class="flex-1 ml-72 p-12">
+            
             <div id="page-fix" class="page-content">
                 <h1 class="text-3xl font-black uppercase mb-10 tracking-tighter">Workshop Log</h1>
                 <div class="grid grid-cols-12 gap-8">
@@ -55,7 +60,7 @@
                             <div id="fixVList" class="space-y-2 max-h-60 overflow-y-auto custom-scroll pr-2"></div>
                         </div>
                         <div class="bg-white p-6 rounded-[2rem] border shadow-sm">
-                            <div class="flex justify-between items-center mb-4"><h3 class="font-black text-xs uppercase text-sky-500">2. Select Part</h3><input id="fixPSearch" onkeyup="filterFix()" placeholder="Search Part..." class="bg-slate-50 p-2 rounded-lg text-sm w-48 outline-none font-bold"></div>
+                            <div class="flex justify-between items-center mb-4"><h3 class="font-black text-xs uppercase text-sky-500">2. Select Part</h3><input id="fixPSearch" onkeyup="filterFix()" placeholder="Search..." class="bg-slate-50 p-2 rounded-lg text-sm w-48 outline-none font-bold"></div>
                             <div id="fixPList" class="space-y-2 max-h-60 overflow-y-auto custom-scroll pr-2"></div>
                         </div>
                     </div>
@@ -66,7 +71,7 @@
                                 <div class="bg-sky-50 p-4 rounded-2xl"><p class="text-[10px] font-bold text-sky-600 uppercase">Part</p><p id="sumP" class="font-black text-lg">---</p></div>
                                 <div class="flex items-center justify-between p-2"><span class="font-black text-sm uppercase">Qty</span><div class="flex items-center gap-4 bg-slate-900 text-white rounded-xl p-1"><button onclick="adjustQty(-1)" class="w-10 h-10 font-bold">-</button><input id="fixQty" type="number" value="1" readonly class="bg-transparent w-8 text-center font-black"><button onclick="adjustQty(1)" class="w-10 h-10 font-bold">+</button></div></div>
                             </div>
-                            <button onclick="applyFix()" class="w-full bg-emerald-500 text-white py-6 rounded-[1.5rem] font-black uppercase hover:bg-emerald-600 shadow-lg">Submit Entry</button>
+                            <button onclick="applyFix()" class="w-full bg-emerald-500 text-white py-6 rounded-[1.5rem] font-black uppercase hover:bg-emerald-600 shadow-lg transition-all">Submit Entry</button>
                         </div>
                     </div>
                 </div>
@@ -76,6 +81,10 @@
                 <div class="flex justify-between items-end mb-8 no-print">
                     <div class="flex gap-4 items-end">
                         <h1 class="text-3xl font-black uppercase tracking-tighter">Inventory</h1>
+                        <div class="bg-white p-2 rounded-xl border shadow-sm w-48 flex items-center gap-2">
+                            <span class="ml-2 text-slate-400 font-bold text-[10px] uppercase">Search</span>
+                            <input id="invSearchInput" onkeyup="updateUI()" class="w-full font-bold outline-none text-xs text-emerald-600 bg-transparent">
+                        </div>
                         <select id="inventoryMonthFilter" onchange="updateUI()" class="bg-white border p-3 rounded-2xl font-bold text-[10px] outline-none shadow-sm">
                             <option value="all">View All Stock</option>
                             <option value="0">Jan</option><option value="1">Feb</option><option value="2">Mar</option><option value="3">Apr</option><option value="4">May</option><option value="5">Jun</option><option value="6">Jul</option><option value="7">Aug</option><option value="8">Sep</option><option value="9">Oct</option><option value="10">Nov</option><option value="11">Dec</option>
@@ -90,12 +99,13 @@
                     <input id="pName" placeholder="Item Name" class="bg-white p-4 rounded-2xl flex-[2] outline-none font-bold">
                     <input id="pPrice" type="number" placeholder="Price $" class="bg-white p-4 rounded-2xl flex-1 outline-none text-center font-bold">
                     <input id="pQty" type="number" placeholder="Qty" class="bg-white p-4 rounded-2xl flex-1 outline-none text-center font-bold">
-                    <button id="savePartBtn" onclick="addPart()" class="bg-slate-900 text-white px-10 rounded-2xl font-black uppercase text-xs">Save Item</button>
+                    <button onclick="addPart()" class="bg-slate-900 text-white px-10 rounded-2xl font-black uppercase text-xs">Save</button>
+                    <button id="cancelPartEdit" onclick="resetEdit()" class="hidden bg-white/20 text-white px-6 rounded-2xl font-bold uppercase text-[10px]">Cancel</button>
                 </div>
-                <div class="bg-white rounded-[2.5rem] border overflow-hidden shadow-sm">
+                <div class="bg-white rounded-[2.5rem] border overflow-hidden shadow-sm print-area">
                     <table class="w-full text-left" id="inventoryTable">
                         <thead class="bg-emerald-50 text-[10px] font-black uppercase text-emerald-700 border-b">
-                            <tr><th class="p-6">Item Name</th><th class="p-6">Last Update</th><th class="p-6">Unit Price</th><th class="p-6 text-center">Live Stock</th><th class="p-6">Total Value</th><th class="p-6 text-right no-print">Actions</th></tr>
+                            <tr><th class="p-6">Item</th><th class="p-6">Updated</th><th class="p-6">Price</th><th class="p-6 text-center">Stock</th><th class="p-6">Value</th><th class="p-6 text-right action-col no-print">Actions</th></tr>
                         </thead>
                         <tbody id="partsList"></tbody>
                     </table>
@@ -103,15 +113,24 @@
             </div>
 
             <div id="page-vehicles" class="page-content">
-                <h1 class="text-3xl font-black uppercase mb-8 tracking-tighter">Fleet</h1>
+                <div class="flex justify-between items-end mb-8">
+                    <h1 class="text-3xl font-black uppercase tracking-tighter">Fleet</h1>
+                    <div class="bg-white p-2 rounded-xl border shadow-sm w-48 flex items-center gap-2">
+                        <span class="ml-2 text-slate-400 font-bold text-[10px] uppercase">Search</span>
+                        <input id="assetSearchInput" onkeyup="updateUI()" class="w-full font-bold outline-none text-xs text-sky-600 bg-transparent">
+                    </div>
+                </div>
                 <div class="bg-sky-500 p-6 rounded-[2.5rem] mb-8 flex gap-4 no-print shadow-xl">
-                    <input id="vPlate" placeholder="Plate Number" class="bg-white p-4 rounded-2xl flex-1 outline-none font-bold uppercase">
-                    <input id="vModel" placeholder="Vehicle Model" class="bg-white p-4 rounded-2xl flex-1 outline-none font-bold">
+                    <input id="vPlate" placeholder="Plate" class="bg-white p-4 rounded-2xl flex-1 outline-none font-bold uppercase">
+                    <input id="vModel" placeholder="Model" class="bg-white p-4 rounded-2xl flex-1 outline-none font-bold">
                     <button onclick="addVehicle()" class="bg-slate-900 text-white px-10 rounded-2xl font-black uppercase text-xs">Add Asset</button>
+                    <button id="cancelVehicleEdit" onclick="resetEdit()" class="hidden bg-white/20 text-white px-6 rounded-2xl font-bold uppercase text-[10px]">Cancel</button>
                 </div>
                 <div class="bg-white rounded-[2.5rem] border overflow-hidden shadow-sm">
                     <table class="w-full text-left">
-                        <thead class="bg-sky-50 text-[10px] font-black uppercase text-sky-700 border-b"><tr><th class="p-6">Plate</th><th class="p-6">Model</th><th class="p-6 text-right no-print">Actions</th></tr></thead>
+                        <thead class="bg-sky-50 text-[10px] font-black uppercase text-sky-700 border-b">
+                            <tr><th class="p-6">Plate</th><th class="p-6">Model</th><th class="p-6 text-right no-print">Actions</th></tr>
+                        </thead>
                         <tbody id="vTable"></tbody>
                     </table>
                 </div>
@@ -134,25 +153,26 @@
                 <div class="bg-white p-12 rounded-[3rem] border shadow-sm print-area">
                     <table class="w-full text-left" id="reportDataTable">
                         <thead class="text-[10px] font-black uppercase text-slate-400 border-b">
-                            <tr><th class="py-4">Date</th><th>Plate</th><th class="text-emerald-600">Model</th><th>Part</th><th class="text-center">Qty</th><th>Subtotal</th><th class="no-print action-col">Action</th></tr>
+                            <tr><th class="py-4">Date</th><th>Plate</th><th class="text-emerald-600">Model</th><th>Part</th><th class="text-center">Qty</th><th class="text-sky-500 text-center">Live Stock</th><th>Subtotal</th><th class="no-print action-col">Action</th></tr>
                         </thead>
                         <tbody id="reportTable"></tbody>
-                        <tfoot><tr><td colspan="5" class="py-10 text-right pr-8 font-black text-slate-400 uppercase text-xs">Monthly Total:</td><td id="totalSpend" class="py-10 text-3xl font-black text-emerald-600"></td><td></td></tr></tfoot>
+                        <tfoot><tr><td colspan="6" class="py-10 text-right pr-8 font-black text-slate-400 uppercase text-xs">Monthly Total:</td><td id="totalSpend" class="py-10 text-3xl font-black text-emerald-600"></td><td class="action-col no-print"></td></tr></tfoot>
                     </table>
                 </div>
             </div>
+
         </main>
     </div>
 
     <script>
+        // PASTE YOUR FIREBASE CONFIG HERE
         const firebaseConfig = {
-            apiKey: "AIzaSyCSgm3aU8VvCrCv1bTAhqm9OS5Efhkpvzo",
+            apiKey: "AIza...",
             authDomain: "cambolink21-inventory.firebaseapp.com",
             projectId: "cambolink21-inventory",
-            storageBucket: "cambolink21-inventory.firebasestorage.app",
-            messagingSenderId: "1018500583599",
-            appId: "1:1018500583599:web:36a866c89309d0b0c7c45a",
-            measurementId: "G-Y5S5NZGXSZ"
+            storageBucket: "cambolink21-inventory.appspot.com",
+            messagingSenderId: "...",
+            appId: "..."
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
