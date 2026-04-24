@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fleet Master Pro - Final Edition</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=Kantumruy+Pro:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', 'Kantumruy Pro', sans-serif; }
+        @media print { .no-print { display: none !important; } .ml-72 { margin-left: 0 !important; } }
+        .page-content { display: none; animation: fadeIn 0.3s ease-in-out; }
+        .page-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .glass { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); }
+        .custom-scroll::-webkit-scrollbar { width: 5px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+        .card-active { border: 2px solid #6366f1 !important; background: #f5f3ff !important; }
+    </style>
+</head>
+<body class="bg-[#f8fafc] text-slate-900">
+
+    <div id="loginOverlay" class="fixed inset-0 bg-[#0f172a] flex items-center justify-center z-[100]">
+        <div class="bg-white p-10 rounded-[2rem] shadow-2xl w-[400px] text-center">
+            <div class="w-16 h-16 bg-indigo-600 rounded-2xl mx-auto mb-6 flex items-center justify-center shadow-lg">
+                <span class="text-white text-2xl font-bold">FM</span>
+            </div>
+            <h1 class="text-2xl font-black mb-8 tracking-tight">Workshop Access</h1>
+            <input id="username" type="text" placeholder="Username" class="w-full border p-4 rounded-xl mb-4 outline-none focus:ring-2 ring-indigo-500">
+            <input id="password" type="password" placeholder="Password" class="w-full border p-4 rounded-xl mb-6 outline-none focus:ring-2 ring-indigo-500">
+            <button onclick="handleLogin()" class="w-full bg-slate-900 text-white p-4 rounded-xl font-bold hover:bg-indigo-600 transition shadow-lg">Login</button>
+        </div>
+    </div>
+
+    <div id="app" class="hidden flex">
+        <aside class="w-72 h-screen bg-[#0f172a] text-white fixed p-8 no-print flex flex-col">
+            <div class="mb-12 flex items-center gap-3">
+                <div class="w-8 h-8 bg-indigo-500 rounded-lg"></div>
+                <span class="text-xl font-black tracking-tighter uppercase">Fleet Master</span>
+            </div>
+            <nav class="space-y-2 flex-1">
+                <button onclick="showPage('page-fix')" class="w-full flex items-center gap-4 p-4 rounded-2xl hover:bg-white/10 transition font-bold" id="nav-fix">🔧 New Repair</button>
+                <button onclick="showPage('page-parts')" class="w-full flex items-center gap-4 p-4 rounded-2xl hover:bg-white/10 transition font-bold" id="nav-parts">📦 Inventory</button>
+                <button onclick="showPage('page-vehicles')" class="w-full flex items-center gap-4 p-4 rounded-2xl hover:bg-white/10 transition font-bold" id="nav-vehicles">🚚 Vehicles List</button>
+                <button onclick="showPage('page-report')" class="w-full flex items-center gap-4 p-4 rounded-2xl hover:bg-white/10 transition font-bold" id="nav-report">📜 History Log</button>
+            </nav>
+            <button onclick="logout()" class="w-full p-4 rounded-2xl hover:bg-red-500/10 text-red-400 font-bold text-left mt-10">🚪 Logout</button>
+        </aside>
+
+        <main class="flex-1 ml-72 p-12">
+            
+            <div id="page-fix" class="page-content">
+                <header class="mb-10">
+                    <h1 class="text-3xl font-black">Record Service</h1>
+                    <p class="text-slate-400">Select units and parts to log maintenance.</p>
+                </header>
+                <div class="grid grid-cols-12 gap-8">
+                    <div class="col-span-8 space-y-6">
+                        <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
+                            <input id="fixVSearch" onkeyup="filterFix()" placeholder="Search Vehicle Plate..." class="w-full bg-slate-50 border-none p-4 rounded-xl mb-4 focus:ring-2 ring-indigo-500 outline-none">
+                            <div id="fixVList" class="grid grid-cols-3 gap-3 max-h-48 overflow-y-auto custom-scroll"></div>
+                        </div>
+                        <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
+                            <input id="fixPSearch" onkeyup="filterFix()" placeholder="Search Spare Part..." class="w-full bg-slate-50 border-none p-4 rounded-xl mb-4 focus:ring-2 ring-indigo-500 outline-none">
+                            <div id="fixPList" class="grid grid-cols-2 gap-3 max-h-48 overflow-y-auto custom-scroll"></div>
+                        </div>
+                    </div>
+                    <div class="col-span-4">
+                        <div class="glass border border-white sticky top-12 p-8 rounded-[2rem] shadow-xl">
+                            <h3 class="font-black mb-6 uppercase text-xs tracking-widest text-slate-400">Job Summary</h3>
+                            <div class="space-y-4 mb-8">
+                                <div class="bg-white p-4 rounded-xl shadow-sm"><p class="text-[10px] font-bold text-indigo-500">VEHICLE</p><p id="sumV" class="font-black">None Selected</p></div>
+                                <div class="bg-white p-4 rounded-xl shadow-sm"><p class="text-[10px] font-bold text-indigo-500">PART</p><p id="sumP" class="font-black">None Selected</p></div>
+                                <div class="flex items-center justify-between">
+                                    <span class="font-bold text-sm">Quantity</span>
+                                    <div class="flex items-center gap-4 bg-white rounded-xl border p-1">
+                                        <button onclick="adjustQty(-1)" class="w-8 h-8 font-bold">-</button>
+                                        <input id="fixQty" type="number" value="1" readonly class="w-8 text-center font-black">
+                                        <button onclick="adjustQty(1)" class="w-8 h-8 font-bold">+</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <button onclick="applyFix()" class="w-full bg-indigo-600 text-white p-5 rounded-2xl font-black shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition">LOG SERVICE</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="page-parts" class="page-content">
+                <div class="flex justify-between items-end mb-8">
+                    <h1 class="text-3xl font-black">Stock Management</h1>
+                    <input id="pSearch" onkeyup="updateUI()" placeholder="Search inventory..." class="bg-white border p-3 rounded-xl w-64">
+                </div>
+                <div class="bg-slate-900 p-6 rounded-[2rem] mb-8 flex gap-4 no-print">
+                    <input id="pName" placeholder="Part Name" class="bg-slate-800 border-none text-white p-4 rounded-xl flex-[2]">
+                    <input id="pPrice" type="number" placeholder="Price $" class="bg-slate-800 border-none text-white p-4 rounded-xl flex-1">
+                    <input id="pQty" type="number" placeholder="Qty" class="bg-slate-800 border-none text-white p-4 rounded-xl flex-1">
+                    <button onclick="addPart()" id="btnPart" class="bg-indigo-500 text-white px-8 rounded-xl font-bold">Save Stock</button>
+                </div>
+                <div class="bg-white rounded-[2rem] border overflow-hidden">
+                    <table class="w-full text-left">
+                        <thead class="bg-slate-50 text-[10px] font-black uppercase tracking-widest border-b">
+                            <tr><th class="p-6">Item Name</th><th class="p-6">Price</th><th class="p-6">Stock</th><th class="p-6">Value</th><th class="p-6 text-right">Actions</th></tr>
+                        </thead>
+                        <tbody id="partsList"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="page-vehicles" class="page-content">
+                <div class="flex justify-between items-end mb-8">
+                    <h1 class="text-3xl font-black">Asset Registry</h1>
+                    <input id="vSearch" onkeyup="updateUI()" placeholder="Search plate..." class="bg-white border p-3 rounded-xl w-64">
+                </div>
+                <div class="bg-white p-6 rounded-[2rem] border mb-8 flex gap-4 no-print">
+                    <input id="vPlate" placeholder="Plate No." class="border p-4 rounded-xl flex-1">
+                    <input id="vModel" placeholder="Model/Brand" class="border p-4 rounded-xl flex-1">
+                    <button onclick="addVehicle()" id="btnVehicle" class="bg-slate-900 text-white px-8 rounded-xl font-bold">Add New</button>
+                </div>
+                <div class="bg-white rounded-[2rem] border overflow-hidden">
+                    <table class="w-full text-left">
+                        <thead class="bg-slate-50 text-[10px] font-black uppercase tracking-widest border-b">
+                            <tr><th class="p-6">Plate Number</th><th class="p-6">Description</th><th class="p-6 text-right">Actions</th></tr>
+                        </thead>
+                        <tbody id="vTable"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="page-report" class="page-content">
+                <div class="flex justify-between items-end mb-8 no-print">
+                    <h1 class="text-3xl font-black">Monthly History</h1>
+                    <div class="flex gap-2">
+                        <button onclick="exportToCSV()" class="bg-emerald-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-emerald-700">Excel Export</button>
+                        <button onclick="window.print()" class="bg-slate-900 text-white px-6 py-3 rounded-xl font-bold">Print A4</button>
+                    </div>
+                </div>
+                <div class="bg-white p-12 rounded-[2rem] border shadow-sm print-area">
+                    <h2 id="reportMonthName" class="text-3xl font-black mb-1"></h2>
+                    <p id="reportDate" class="text-indigo-600 font-bold mb-8"></p>
+                    <table class="w-full text-left">
+                        <thead class="text-[10px] font-black uppercase text-slate-400 border-b">
+                            <tr><th class="py-4">Date</th><th>Plate</th><th>Part</th><th>Qty</th><th>Subtotal</th><th class="no-print">Action</th></tr>
+                        </thead>
+                        <tbody id="reportTable"></tbody>
+                        <tfoot class="border-t-2 border-slate-900">
+                            <tr><td colspan="4" class="py-8 text-right pr-6 font-bold text-slate-400">TOTAL:</td><td id="totalSpend" class="py-8 text-2xl font-black"></td></tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
