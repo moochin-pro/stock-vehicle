@@ -18,7 +18,7 @@ function toggleMenu() {
 function handleLogin() {
     const user = document.getElementById('username').value;
     const pass = document.getElementById('password').value;
-    if (user === "thea" && pass === "cambo@123") {
+    if (user === "Admin" && pass === "cambo@123") {
         sessionStorage.setItem('auth', 'true');
         location.reload();
     } else alert("Access Denied");
